@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>كرت العيد - مركز ابن تيمية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700&family=Amiri:wght@700&family=Tajawal:wght@700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <style>
+        :root {
+            --gold-dark: #b8860b;
+            --silver: #a0a0a0;
+            --bronze: #cd7f32;
+        }
+
+        body { font-family: 'Cairo', sans-serif; background-color: #3b3b5e; display: flex; flex-direction: column; align-items: center; padding: 20px; color: white; margin: 0; }
+        .input-box { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); margin-bottom: 30px; text-align: center; color: #333; width: 100%; max-width: 420px; }
+        input[type="text"], select { padding: 10px; font-size: 16px; border: 2px solid #ddd; border-radius: 10px; width: 90%; margin-bottom: 10px; text-align: center; outline: none; }
+        .setting-label { font-size: 13px; margin: 5px 0; font-weight: bold; color: #555; }
+        .slider-group { margin-bottom: 15px; }
+        .slider-group input { width: 90%; cursor: pointer; }
+        
+        .color-selector { display: flex; justify-content: center; gap: 10px; margin-bottom: 15px; }
+        .color-btn { width: 35px; height: 35px; border-radius: 5px; cursor: pointer; border: 2px solid transparent; }
+        .btn-gold { background: var(--gold-dark); }
+        .btn-silver { background: var(--silver); }
+        .btn-bronze { background: var(--bronze); }
+        .btn-white { background: #eee; border: 1px solid #ccc; }
+
+        button.main-btn { padding: 12px 30px; background-color: #5d5d81; color: white; border: none; border-radius: 10px; cursor: pointer; width: 90%; font-weight: bold; margin-top: 10px; }
+
+        #cardWrapper { display: none; position: relative; width: 450px; height: 800px; border-radius: 15px; overflow: hidden; box-shadow: 0 15px 40px rgba(0,0,0,0.5); }
+        #cardImage { width: 100%; height: 100%; object-fit: fill; position: absolute; top: 0; left: 0; z-index: 1; }
+        
+        /* الارتفاع ثابت هنا كما طلبت */
+        .overlay-area { position: absolute; bottom: 160px; left: 50%; transform: translateX(-50%); width: 400px; height: 100px; display: flex; align-items: center; justify-content: center; z-index: 5; }
+        
+        .name-text { position: relative; font-weight: bold; text-align: center; white-space: nowrap; z-index: 10; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3)); transition: 0.3s; }
+        .text-gold { color: var(--gold-dark); }
+        .text-silver { color: var(--silver); }
+        .text-bronze { color: var(--bronze); }
+        .text-white { color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+    </style>
+</head>
+<body>
+
+    <div class="input-box">
+        <h2>🎉 تخصيص الكرت</h2>
+        <input type="text" id="nameIn" placeholder="أدخل اسمك هنا..." oninput="updatePreview()">
+        
+        <div class="setting-label">نوع الخط:</div>
+        <select id="fontSelect" onchange="updateFont(this.value)">
+            <option value="'Cairo', sans-serif">خط القاهرة</option>
+            <option value="'Amiri', serif">خط أميري</option>
+            <option value="'Tajawal', sans-serif">خط تجول</option>
+        </select>
+
+        <div class="setting-label">اختر اللون الرسمي:</div>
+        <div class="color-selector">
+            <div class="color-btn btn-white" onclick="applyColor('text-white')"></div>
+            <div class="color-btn btn-bronze" onclick="applyColor('text-bronze')"></div>
+            <div class="color-btn btn-silver" onclick="applyColor('text-silver')"></div>
+            <div class="color-btn btn-gold" onclick="applyColor('text-gold')"></div>
+        </div>
+
+        <div class="slider-group">
+            <div class="setting-label">حجم الخط:</div>
+            <input type="range" id="sizeSlider" min="20" max="60" value="20" oninput="updateSize(this.value)">
+        </div>
+
+        <button class="main-btn" onclick="generateCard()">عرض الكرت</button>
+        <button id="downloadBtn" class="main-btn" style="display:none;" onclick="downloadImage()">كرتك جاهز ↓</button>
+    </div>
+
+    <div id="cardWrapper">
+        <img id="cardImage" src="card.jpg">
+        <div class="overlay-area" id="overlayArea">
+            <div class="name-text text-white" id="nameOut" style="font-size: 20px; font-family: 'Cairo', sans-serif;"></div>
+        </div>
+    </div>
+
+    <script>
+        // الارتفاع ثابت ولا يحتاج تغيير
+        window.onload = function() {
+            document.getElementById('nameOut').style.fontSize = "20px";
+        };
+
+        function updatePreview() { document.getElementById('nameOut').innerText = document.getElementById('nameIn').value; }
+        function applyColor(className) { document.getElementById('nameOut').className = 'name-text ' + className; }
+        function updateSize(v) { document.getElementById('nameOut').style.fontSize = v + "px"; }
+        function updateFont(f) { document.getElementById('nameOut').style.fontFamily = f; }
+        
+        function generateCard() {
+            if(document.getElementById('nameIn').value.trim() !== "") {
+                document.getElementById('cardWrapper').style.display = 'block';
+                document.getElementById('downloadBtn').style.display = 'block';
+            }
+        }
+        function downloadImage() {
+            html2canvas(document.getElementById('cardWrapper'), { allowTaint: true, logging: false }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'Eid-Card.png';
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+            });
+        }
+    </script>
+</body>
+</html>
